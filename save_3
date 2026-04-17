@@ -1,0 +1,37 @@
+{
+    "role": "Mage",
+    "level": 3,
+    "xp": 141,
+    "xp_to_next_level": 225,
+    "hp": 83,
+    "maxhp": 96,
+    "mana": 181,
+    "maxmana": 181,
+    "basemaxmana": 181,
+    "mana_regen": 10,
+    "gold": 314,
+    "physical_multi": 0.9680000000000002,
+    "magic_multi": 1.8150000000000004,
+    "backpack": [
+        "wooden_wand",
+        "pot_lid",
+        "club",
+        "war_hammer",
+        "crystal_shard",
+        "stew",
+        "wooden_lid",
+        "buckler",
+        "burnt_branch"
+    ],
+    "equipped_weapon": "war_hammer",
+    "weapon_durability": 23,
+    "equipped_shield": "",
+    "shield_durability": 1,
+    "shield_overshield": 0,
+    "spelllevel": 1,
+    "spells": [
+        "Fireball",
+        "Heal",
+        "Zap"
+    ]
+}
