@@ -3,7 +3,8 @@ import time
 import questionary
 import json
 import glob
-from matplotlib.style.core import available
+from colorama import init, Fore, Style
+init()
 
 item_database = {
     "apple": {"type": "food", "rarity": "common", "boost": 10, "price": 5},
@@ -111,7 +112,7 @@ class Player:
         else:
             self.role = "Novice"
             self.backpack.append('rusty_dagger')
-            print('Invalid role. Defaulting to Novice stats.')
+            print(f'{Fore.RED}Invalid role. Defaulting to Novice stats.{Style.RESET_ALL}')
         self.hp = self.maxhp
         self.mana = self.maxmana
         self.weapon_durability = item_database[self.equipped_weapon]['durability']
@@ -119,12 +120,12 @@ class Player:
         self.shield_durability = 1
         self.spelllevel = 1
         self.spells = [name for name, data in self.SPELL_DATABASE.items() if data['level'] == self.spelllevel]
-        print(f"--- Character Summary ---")
-        print(f"Role: {self.role}")
-        print(f"HP: {self.hp}/{self.maxhp}")
-        print(f"Mana: {self.mana}/{self.maxmana}")
+        print(f"{Fore.YELLOW}--- Character Summary ---{Style.RESET_ALL}")
+        print(f"Role: {Fore.CYAN}{self.role}{Style.RESET_ALL}")
+        print(f"HP: {Fore.GREEN}{self.hp}/{self.maxhp}{Style.RESET_ALL}")
+        print(f"Mana: {Fore.BLUE}{self.mana}/{self.maxmana}{Style.RESET_ALL}")
         print(f"Backpack: {self.backpack}")
-        print(f"Spells: {self.spells}")
+        print(f"Spells: {Fore.MAGENTA}{self.spells}{Style.RESET_ALL}")
         print(f"Equipped Weapon: {self.equipped_weapon}")
         print(f"Physical Multiplier: {self.physical_multi:.2f}")
         print(f"Magic Multiplier: {self.magic_multi:.2f}\n")
@@ -133,7 +134,7 @@ class Player:
     def gain_xp(self, xp):
         self.xp += xp
         time.sleep(0.5)
-        print(f"You have earned {xp} XP! Current xp: {self.xp}/{self.xp_to_next_level}")
+        print(f"{Fore.YELLOW}You have earned {xp} XP! Current xp: {self.xp}/{self.xp_to_next_level}{Style.RESET_ALL}")
         while self.xp >= self.xp_to_next_level:
             self.level_up()
 
@@ -155,11 +156,11 @@ class Player:
             self.spelllevel = 3
             self.spells = [name for name, data in self.SPELL_DATABASE.items() if data['level'] == self.spelllevel]
         time.sleep(1)
-        print(f"You have leveled up!")
-        print(f"You are now level {self.level}")
+        print(f"{Fore.YELLOW}You have leveled up!{Style.RESET_ALL}")
+        print(f"{Fore.YELLOW}You are now level {self.level}{Style.RESET_ALL}")
         print("Your new stats:")
-        print(f"HP: {self.hp}/{self.maxhp}")
-        print(f"Mana: {self.mana}/{self.maxmana}")
+        print(f"HP: {Fore.GREEN}{self.hp}/{self.maxhp}{Style.RESET_ALL}")
+        print(f"Mana: {Fore.BLUE}{self.mana}/{self.maxmana}{Style.RESET_ALL}")
         print(f"Physical Multiplier: {self.physical_multi:.2f}")
         print(f"Magic Multiplier: {self.magic_multi:.2f}\n")
         time.sleep(2)
@@ -171,21 +172,21 @@ class Player:
         if self.mana < self.maxmana:
             self.mana += added_mana
             self.mana = min(self.mana, self.maxmana)
-            print(f"You regenerated {added_mana} mana")
+            print(f"{Fore.BLUE}You regenerated {added_mana} mana{Style.RESET_ALL}")
 
     def show_stats(self):
-        print(f"Your current health: {max(int(self.hp), 0)}/{self.maxhp}")
-        print(f"Your current mana: {max(int(self.mana), 0)}/{self.maxmana}")
+        print(f"Your current health: {Fore.GREEN}{max(int(self.hp), 0)}/{self.maxhp}{Style.RESET_ALL}")
+        print(f"Your current mana: {Fore.BLUE}{max(int(self.mana), 0)}/{self.maxmana}{Style.RESET_ALL}")
 
     def equip_item(self, item):
         item_data = item_database.get(item)
         if not item_data or item not in self.backpack:
-            print("Invalid request.\n")
+            print(f"{Fore.RED}Invalid request.\n{Style.RESET_ALL}")
             return
         if item_data['type'] in ['physical', 'magic']:
             self.equipped_weapon = item
             self.weapon_durability = item_data['durability']
-            print(f"You have equipped {self.equipped_weapon}\n")
+            print(f"You have equipped {Fore.CYAN}{self.equipped_weapon}{Style.RESET_ALL}\n")
             self.maxmana = self.basemaxmana
             if item_data['type'] == 'magic':
                 self.maxmana = self.basemaxmana
@@ -198,26 +199,26 @@ class Player:
                 self.shield_overshield = item_data['defense']
             else:
                 self.shield_durability = item_data['durability']
-            print(f"You have equipped {self.equipped_shield}\n")
+            print(f"You have equipped {Fore.CYAN}{self.equipped_shield}{Style.RESET_ALL}\n")
         else:
-            print("You cannot equip this item!\n")
+            print(f"{Fore.RED}You cannot equip this item!\n{Style.RESET_ALL}")
         time.sleep(0.5)
 
     def use_heal(self, item):
         item_data = item_database.get(item)
         if not item_data or item not in self.backpack:
-            print("Invalid request.\n")
+            print(f"{Fore.RED}Invalid request.\n{Style.RESET_ALL}")
             return
         if item_data['type'] != 'food':
-            print("You can only eat food!\n")
+            print(f"{Fore.RED}You can only eat food!\n{Style.RESET_ALL}")
             return
         if self.hp == self.maxhp:
-            print("Your HP is already full!\n")
+            print(f"{Fore.RED}Your HP is already full!\n{Style.RESET_ALL}")
             return
         heal = item_data['boost']
         self.hp = min(self.maxhp, self.hp + heal)
         self.backpack.remove(item)
-        print(f'You ate the {item.title()}. Healed {heal}HP. Current HP: {self.hp}/{self.maxhp}\n')
+        print(f'{Fore.GREEN}You ate the {item.title()}. Healed {heal}HP. Current HP: {self.hp}/{self.maxhp}\n{Style.RESET_ALL}')
         time.sleep(0.8)
 
     def filter_backpack(self):
@@ -226,7 +227,7 @@ class Player:
     def is_item_broken(self):
         if self.weapon_durability < 1:
             self.backpack.remove(self.equipped_weapon)
-            print("CRACK! Your weapon broke!")
+            print(f"{Fore.RED}CRACK! Your weapon broke!{Style.RESET_ALL}")
             time.sleep(0.5)
             choices = self.filter_backpack()
             if choices:
@@ -236,13 +237,13 @@ class Player:
                 self.equipped_weapon = None
         elif self.shield_durability < 1 and self.equipped_shield != '':
             self.backpack.remove(self.equipped_shield)
-            print("CRACK! Your shield broke!")
+            print(f"{Fore.RED}CRACK! Your shield broke!{Style.RESET_ALL}")
             self.equipped_shield = ''
 
     def attack(self, target):
         if not self.equipped_weapon:
             target.hp -= 2
-            print(f"\nYou dealt 2 damage to the {target.name}!")
+            print(f"\n{Fore.YELLOW}You dealt 2 damage to the {target.name}!{Style.RESET_ALL}")
             return
         weapon_data = item_database.get(self.equipped_weapon)
         weapon_damage = weapon_data['dmg']
@@ -252,11 +253,11 @@ class Player:
             damage_output = weapon_damage * self.magic_multi
         if target.weakness == weapon_data['type']:
             damage_output = damage_output * 1.5
-            print("It's super effective!")
+            print(f"{Fore.MAGENTA}It's super effective!{Style.RESET_ALL}")
         damage_output = int(damage_output)
         target.hp -= damage_output
-        print(f"\nYou dealt {damage_output} damage to the {target.name}!")
-        print(f"{target.name} (HP: {max(0, int(target.hp))} / {target.maxhp})")
+        print(f"\n{Fore.YELLOW}You dealt {damage_output} damage to the {target.name}!{Style.RESET_ALL}")
+        print(f"{target.name} (HP: {Fore.RED}{max(0, int(target.hp))} / {target.maxhp}{Style.RESET_ALL})")
         if weapon_data['rarity'] != 'common':
             self.weapon_durability -= 1
             self.is_item_broken()
@@ -269,9 +270,9 @@ class Player:
             defense = min(self.shield_overshield, enemy_attack)
             self.shield_overshield -= defense
             returned_damage = enemy_attack - defense
-            print(f"You blocked {defense} of the damage")
+            print(f"{Fore.CYAN}You blocked {defense} of the damage{Style.RESET_ALL}")
             if self.shield_overshield < 1:
-                print("Your shield broke")
+                print(f"{Fore.RED}Your shield broke{Style.RESET_ALL}")
                 self.backpack.remove(self.equipped_shield)
                 self.equipped_shield = ''
             return max(returned_damage, 0)
@@ -280,12 +281,12 @@ class Player:
             damage_negated = int(enemy_attack * shield_buff)
             enemy_attack -= damage_negated
             self.shield_durability -= 1
-            print(f'Your shield blocked {damage_negated} of the incoming damage!')
+            print(f'{Fore.CYAN}Your shield blocked {damage_negated} of the incoming damage!{Style.RESET_ALL}')
             self.is_item_broken()
             return max(0, int(enemy_attack))
         elif shield_info['kind'] == 'negation':
             self.shield_durability -= 1
-            print(f'Your shield blocked all of the incoming damage!')
+            print(f'{Fore.CYAN}Your shield blocked all of the incoming damage!{Style.RESET_ALL}')
             self.is_item_broken()
             return 0
         return enemy_attack
@@ -317,13 +318,13 @@ class Player:
         return save_data
 
     def take_damage(self, enemy_attack):
-        print(f"The enemy attacked with {enemy_attack} damage")
+        print(f"{Fore.RED}The enemy attacked with {enemy_attack} damage{Style.RESET_ALL}")
         taken_damage = enemy_attack
         if self.equipped_shield:
             taken_damage = self.after_shield_damage(enemy_attack)
         self.hp -= taken_damage
         time.sleep(0.5)
-        print(f"Your health: {max(0, int(self.hp))}/{self.maxhp}\n")
+        print(f"Your health: {Fore.GREEN}{max(0, int(self.hp))}/{self.maxhp}{Style.RESET_ALL}\n")
 
     def cast_spell(self, name, target):
         spell_data = self.SPELL_DATABASE.get(name)
@@ -334,7 +335,7 @@ class Player:
                 target.burn_time = spell_data['level']
             elif spell_data['type'] == 'heal':
                 self.hp = min(self.maxhp, self.hp + damage)
-                print(f"You healed {self.hp + damage}HP!")
+                print(f"{Fore.GREEN}You healed {damage}HP!{Style.RESET_ALL}")
                 return
             elif spell_data['type'] == 'electric':
                 target.is_enemy_debuffed = True
@@ -344,8 +345,8 @@ class Player:
                 target.is_enemy_frozen = True
                 target.can_i_attack = False
             target.hp -= damage
-            print(f"{target.name} took {damage} damage!")
-            print(f"{target.name} (HP: {max(0, int(target.hp))}/{target.maxhp})")
+            print(f"{Fore.YELLOW}{target.name} took {damage} damage!{Style.RESET_ALL}")
+            print(f"{target.name} (HP: {Fore.RED}{max(0, int(target.hp))}/{target.maxhp}{Style.RESET_ALL})")
             time.sleep(0.5)
 
 
@@ -378,7 +379,7 @@ class Enemy:
                 burn_damage = int(self.hp * 0.1)
                 self.hp -= burn_damage
                 self.burn_time -= 1
-                print(f"The {self.name} took {burn_damage} fire damage!")
+                print(f"{Fore.RED}The {self.name} took {burn_damage} fire damage!{Style.RESET_ALL}")
                 time.sleep(0.5)
         if self.burn_time <= 0:
             self.is_enemy_burning = False
@@ -386,7 +387,7 @@ class Enemy:
     def is_debuffed(self):
         if self.is_enemy_debuffed:
             self.current_damage = int(self.base_damage * 0.8)
-            print("The enemy is debuffed!")
+            print(f"{Fore.MAGENTA}The enemy is debuffed!{Style.RESET_ALL}")
             self.debuff_time -= 1
         if self.debuff_time <= 0:
             self.is_enemy_debuffed = False
@@ -396,7 +397,7 @@ class Enemy:
         if self.is_enemy_frozen:
             self.can_i_attack = False
             self.freeze_time -= 1
-            print(f"The {self.name} cant attack because its frozen")
+            print(f"{Fore.CYAN}The {self.name} cant attack because its frozen{Style.RESET_ALL}")
             time.sleep(0.5)
         if self.freeze_time <= 0:
             self.can_i_attack = True
@@ -405,17 +406,17 @@ class Enemy:
     def is_dead(self, player):
         if self.hp < 1:
             self.is_alive = False
-            print(f"The {self.name} has been defeated!!!")
-            print(f"You gained {self.coindrop} coins\n")
+            print(f"{Fore.GREEN}The {self.name} has been defeated!!!{Style.RESET_ALL}")
+            print(f"{Fore.YELLOW}You gained {self.coindrop} coins\n{Style.RESET_ALL}")
             player.gold += self.coindrop
             player.gain_xp(self.xpdrop)
             dropped_item = self.drop_item()
             player.backpack.append(dropped_item)
-            print(f"{dropped_item} was found and added to your backpack")
+            print(f"{Fore.YELLOW}{dropped_item} was found and added to your backpack{Style.RESET_ALL}")
 
     def attack(self, target):
         time.sleep(0.5)
-        print(f"\nThe {self.name} strikes!")
+        print(f"\n{Fore.RED}The {self.name} strikes!{Style.RESET_ALL}")
         dealt_damage = int(self.current_damage + self.current_damage * random.uniform(-0.2, 0.2))
         target.take_damage(dealt_damage)
 
@@ -444,7 +445,7 @@ def save_adventure(save, saved_stats):
     saved_stats = saved_stats
     with open(save_name, 'w') as f:
         json.dump(saved_stats, f, indent=4)
-    print(f"Game has been saved to {save_name}")
+    print(f"{Fore.GREEN}Game has been saved to {save_name}{Style.RESET_ALL}")
 
 
 def tdt():
@@ -489,7 +490,7 @@ if saves:
             p1.spelllevel = data['spelllevel']
             p1.spells = data['spells']
 
-            print("Data has been loaded")
+            print(f"{Fore.GREEN}Data has been loaded{Style.RESET_ALL}")
     else:
         your_class = questionary.select("What class do you want to be?",
                                         choices=['Warrior', 'Mage', 'Tank', 'Battlemage']).ask()
@@ -505,7 +506,7 @@ else:
 
 while running:
     e1 = Enemy()
-    print(f'\nYou encountered a {e1.name} (HP: {int(e1.hp)}/{e1.maxhp})!')
+    print(f'\n{Fore.RED}You encountered a {e1.name} (HP: {int(e1.hp)}/{e1.maxhp})!{Style.RESET_ALL}')
     while p1.hp > 0 and e1.hp > 0:
         choice = questionary.select("Your move:", choices=["Attack", "Use Item", "Equip Item", "Cast Spell"]).ask()
         time.sleep(0.5)
@@ -517,7 +518,7 @@ while running:
                 item = questionary.select("Use what:", choices=filtered_usables).ask()
                 p1.use_heal(item)
             else:
-                print("No food in backpack!")
+                print(f"{Fore.RED}No food in backpack!{Style.RESET_ALL}")
         elif choice == 'Equip Item':
             filtered_equipables = [item for item in p1.backpack if
                                    item_database.get(item)['type'] in ['physical', 'magic', 'shield']]
@@ -525,7 +526,7 @@ while running:
                 item = questionary.select("Equip what:", choices=filtered_equipables).ask()
                 p1.equip_item(item)
             else:
-                print("Nothing to equip!")
+                print(f"{Fore.RED}Nothing to equip!{Style.RESET_ALL}")
         elif choice == 'Cast Spell':
             spell_choice = questionary.select('What spell do you want to cast: ', choices=p1.spells).ask()
             p1.cast_spell(spell_choice, e1)
@@ -542,7 +543,7 @@ while running:
             e1.attack(p1)
         p1.show_stats()
         if p1.hp < 1:
-            print("You died!!!")
+            print(f"{Fore.RED}You died!!!{Style.RESET_ALL}")
             running = False
             break
     if running:
