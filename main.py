@@ -496,16 +496,9 @@ if saves:
                                         choices=['Warrior', 'Mage', 'Tank', 'Battlemage']).ask()
         p1 = Player(your_class)
 
-if questionary.select("Are you ready to start?", choices=["Yes", 'No']).ask() == 'Yes':
-    running = True
-    print("You go down the path")
-    tdt()
-else:
-    running = False
-    print("You cower away...")
-
-while running:
+def engage_enemy(p1):
     e1 = Enemy()
+    player_dead = False
     print(f'\n{Fore.RED}You encountered a {e1.name} (HP: {int(e1.hp)}/{e1.maxhp})!{Style.RESET_ALL}')
     while p1.hp > 0 and e1.hp > 0:
         choice = questionary.select("Your move:", choices=["Attack", "Use Item", "Equip Item", "Cast Spell"]).ask()
@@ -544,16 +537,25 @@ while running:
         p1.show_stats()
         if p1.hp < 1:
             print(f"{Fore.RED}You died!!!{Style.RESET_ALL}")
-            running = False
+            player_dead = True
             break
-    if running:
         p1.regen_mana()
+    return player_dead
+
+def run_adventure():
+    print("You go down the path")
+    tdt()
+    while True:
+        if engage_enemy(p1):
+            break
         if questionary.select("Continue?", choices=['Yes', 'No']).ask() == 'No':
             if questionary.select("Do you want to save this adventure?", choices=['Yes', 'No']).ask() == 'Yes':
                 selected_save = ''
                 if len(saves) > 3:
-                    if questionary.select("You do not have any free slots left, do you want to overwrite a save?", choices=['Yes', 'No']).ask() == 'Yes':
-                        selected_save = questionary.select("Which save do you want to select: ", choices=saves).ask()
+                    if questionary.select("You do not have any free slots left, do you want to overwrite a save?",
+                                          choices=['Yes', 'No']).ask() == 'Yes':
+                        selected_save = questionary.select("Which save do you want to select: ",
+                                                           choices=saves).ask()
                 for i in range(1, 4):
                     slot_name = f'save_{i}'
                     if slot_name not in saves:
@@ -562,4 +564,12 @@ while running:
                 stat_save = p1.convert_to_dic()
                 save_adventure(selected_save, stat_save)
             tdt()
-            running = False
+            break
+
+if questionary.select("Are you ready to start?", choices=["Yes", 'No']).ask() == 'Yes':
+    run_adventure()
+
+else:
+    running = False
+    print("You cower away...")
+
