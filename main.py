@@ -4,6 +4,7 @@ import questionary
 import json
 import glob
 from colorama import init, Fore, Style
+import os
 init()
 
 item_database = {
@@ -91,7 +92,7 @@ class Player:
     }
 
     def __init__(self, role):
-        self.maxhp, self.basemaxmana, self.maxmana, self.gold = 100, 100, 100, 200
+        self.maxhp, self.basemaxmana, self.maxmana, self.gold = 100, 100, 100, 100
         self.physical_multi, self.magic_multi = 1.0, 1.0
         self.mana_regen = 10
         self.backpack = ['apple']
@@ -376,7 +377,7 @@ class Enemy:
     def is_burning(self):
         if self.is_enemy_burning:
             if self.hp > 0:
-                burn_damage = int(self.hp * 0.1)
+                burn_damage = int(self.maxhp * 0.1)
                 self.hp -= burn_damage
                 self.burn_time -= 1
                 print(f"{Fore.RED}The {self.name} took {burn_damage} fire damage!{Style.RESET_ALL}")
@@ -459,38 +460,50 @@ saves = glob.glob('*save*')
 if saves:
     if questionary.select("Do you want to load an existing save?", choices=['Yes', "No"]).ask() == 'Yes':
         chosen_save = questionary.select("Which save do you want to load:", choices=saves).ask()
-        with open(chosen_save, 'r') as f:
-            data = json.load(f)
+        try:
+            with open(chosen_save, 'r') as f:
+                data = json.load(f)
 
-            p1 = Player(data['role'])
+                p1 = Player(data['role'])
 
-            p1.level = data['level']
-            p1.xp = data['xp']
-            p1.xp_to_next_level = data['xp_to_next_level']
+                p1.level = data['level']
+                p1.xp = data['xp']
+                p1.xp_to_next_level = data['xp_to_next_level']
 
-            p1.hp = data['hp']
-            p1.maxhp = data['maxhp']
-            p1.mana = data['mana']
-            p1.maxmana = data['maxmana']
-            p1.basemaxmana = data['basemaxmana']
-            p1.mana_regen = data['mana_regen']
+                p1.hp = data['hp']
+                p1.maxhp = data['maxhp']
+                p1.mana = data['mana']
+                p1.maxmana = data['maxmana']
+                p1.basemaxmana = data['basemaxmana']
+                p1.mana_regen = data['mana_regen']
 
-            p1.gold = data['gold']
-            p1.backpack = data['backpack']
+                p1.gold = data['gold']
+                p1.backpack = data['backpack']
 
-            p1.physical_multi = data['physical_multi']
-            p1.magic_multi = data['magic_multi']
+                p1.physical_multi = data['physical_multi']
+                p1.magic_multi = data['magic_multi']
 
-            p1.equipped_weapon = data['equipped_weapon']
-            p1.weapon_durability = data['weapon_durability']
-            p1.equipped_shield = data['equipped_shield']
-            p1.shield_durability = data['shield_durability']
-            p1.shield_overshield = data['shield_overshield']
+                p1.equipped_weapon = data['equipped_weapon']
+                p1.weapon_durability = data['weapon_durability']
+                p1.equipped_shield = data['equipped_shield']
+                p1.shield_durability = data['shield_durability']
+                p1.shield_overshield = data['shield_overshield']
 
-            p1.spelllevel = data['spelllevel']
-            p1.spells = data['spells']
+                p1.spelllevel = data['spelllevel']
+                p1.spells = data['spells']
 
-            print(f"{Fore.GREEN}Data has been loaded{Style.RESET_ALL}")
+                print(f"{Fore.GREEN}Data has been loaded{Style.RESET_ALL}")
+        except (json.JSONDecodeError, KeyError, TypeError, ValueError):
+            print("There has been a corruption on the file you want to open")
+            try:
+                os.remove(chosen_save)
+                print("The file has been deleted and you started a new adventure")
+            except OSError:
+                print("Delete has failed")
+            your_class = questionary.select("What class do you want to be?",
+                                            choices=['Warrior', 'Mage', 'Tank', 'Battlemage']).ask()
+            p1 = Player(your_class)
+            saves = glob.glob('*save*')
     else:
         your_class = questionary.select("What class do you want to be?",
                                         choices=['Warrior', 'Mage', 'Tank', 'Battlemage']).ask()
@@ -542,12 +555,48 @@ def engage_enemy(p1):
         p1.regen_mana()
     return player_dead
 
+def open_merchant(p1):
+    time.sleep(1)
+    print(f"\nYou have encountered a {Fore.YELLOW}MERCHANT{Style.RESET_ALL}")
+    print(f"You have {Fore.YELLOW}{p1.gold} coins{Style.RESET_ALL}")
+    time.sleep(1)
+    common_item = random.choice([name for name, data in item_database.items() if data.get('rarity') == 'common'])
+    uncommon_item = random.choice([name for name, data in item_database.items() if data.get('rarity') == 'uncommon'])
+    rare_item = random.choice([name for name, data in item_database.items() if data.get('rarity') == 'rare'])
+    legendary_item = random.choice([name for name, data in item_database.items() if data.get('rarity') == 'legendary'])
+    items_for_sale = [
+        common_item + f" {item_database[common_item]['price']} coins",
+        uncommon_item + f" {item_database[uncommon_item]['price']} coins",
+        rare_item + f" {item_database[rare_item]['price']} coins",
+        legendary_item + f" {item_database[legendary_item]['price']} coins",
+        "None"
+    ]
+    while True:
+        item_bought = questionary.select("Would you like to buy an item: ", choices=items_for_sale).ask()
+        if item_bought == 'None':
+            break
+        item_name_only = item_bought.rsplit(' ', 2)[0]
+        item_price = item_database[item_name_only]['price']
+        time.sleep(1)
+        if p1.gold >= item_price:
+            p1.gold -= item_price
+            p1.backpack.append(item_name_only)
+            items_for_sale.remove(item_bought)
+            print("The item has been added to your inventory!")
+            print(f"Coins left: {p1.gold}")
+        else:
+            print("You do not have enough coins to buy that weapon")
+        time.sleep(1)
+
+
 def run_adventure():
     print("You go down the path")
     tdt()
     while True:
         if engage_enemy(p1):
             break
+        if True: #random.random() < 0.25:
+            open_merchant(p1)
         if questionary.select("Continue?", choices=['Yes', 'No']).ask() == 'No':
             if questionary.select("Do you want to save this adventure?", choices=['Yes', 'No']).ask() == 'Yes':
                 selected_save = ''
