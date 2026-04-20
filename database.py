@@ -1,6 +1,3 @@
-import random
-import questionary
-
 item_database = {
     "apple": {"type": "food", "rarity": "common", "boost": 10, "price": 5},
     "bread": {"type": "food", "rarity": "common", "boost": 15, "price": 8},
@@ -48,19 +45,13 @@ item_database = {
                           "durability": 50, "price": 3000, 'mana_regen_bonus': 50}
 }
 
-
-print("You have encountered a merchant")
-common_item = random.choice([name for name, data in item_database.items() if data.get('rarity') == 'common'])
-uncommon_item = random.choice([name for name, data in item_database.items() if data.get('rarity') == 'uncommon'])
-rare_item = random.choice([name for name, data in item_database.items() if data.get('rarity') == 'rare'])
-legendary_item = random.choice([name for name, data in item_database.items() if data.get('rarity') == 'legendary'])
-while True:
-    items_for_sale = [
-        common_item + f" {item_database[common_item]['price']} coins",
-        uncommon_item + f" {item_database[uncommon_item]['price']} coins",
-        rare_item + f" {item_database[rare_item]['price']} coins",
-        legendary_item + f" {item_database[legendary_item]['price']} coins",
-        "None"
-    ]
-    item_bought = questionary.select("Would you like to buy an item: ", choices=items_for_sale).ask()
-    print(item_bought)
+enemy_database = {
+    "Dragon": {'hp': (500, 600), 'damage': 60, 'coindrop': (100, 120), 'xp': (1000, 1200), 'weakness': 'physical',
+               'rarity': 'legendary'},
+    "Cyclops": {'hp': (350, 420), 'damage': 10, 'coindrop': (40, 50), 'xp': (300, 400), 'weakness': 'none',
+                'rarity': 'rare'},
+    "Orc": {'hp': (20, 30), 'damage': 55, 'coindrop': (20, 30), 'xp': (100, 200), 'weakness': 'magic',
+            'rarity': 'uncommon'},
+    "Goblin": {'hp': (10, 20), 'damage': 7, 'coindrop': (10, 15), 'xp': (20, 40), 'weakness': 'magic',
+               'rarity': 'common'},
+}
