@@ -3,6 +3,7 @@ from colorama import init, Fore, Style
 import time
 import questionary
 from database import item_database
+init()
 
 def engage_enemy(p1):
     e1 = Enemy()
@@ -36,6 +37,8 @@ def engage_enemy(p1):
         e1.is_debuffed()
         e1.is_frozen()
         e1.is_dead(p1)
+        p1.is_burning()
+        p1.is_debuffed()
 
         if not e1.is_alive:
             p1.show_stats()

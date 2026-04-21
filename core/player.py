@@ -59,6 +59,12 @@ class Player:
         self.shield_overshield = 0
         self.shield_durability = 1
         self.spelllevel = 1
+        self.is_player_burning = False
+        self.burn_time = 0
+        self.is_player_debuffed = False
+        self.debuff_time = 0
+        self.current_physical_multi = self.physical_multi
+        self.current_magic_multi = self.magic_multi
         self.spells = [name for name, data in self.SPELL_DATABASE.items() if data['level'] == self.spelllevel]
         print(f"{Fore.YELLOW}--- Character Summary ---{Style.RESET_ALL}")
         print(f"Role: {Fore.CYAN}{self.role}{Style.RESET_ALL}")
@@ -70,6 +76,30 @@ class Player:
         print(f"Physical Multiplier: {self.physical_multi:.2f}")
         print(f"Magic Multiplier: {self.magic_multi:.2f}\n")
         time.sleep(1.5)
+
+    def is_burning(self):
+        if self.is_player_burning:
+            if self.hp > 0:
+                burn_damage = int(self.maxhp * 0.1)
+                self.hp -= burn_damage
+                self.burn_time -= 1
+                print(f"{Fore.RED}You took {burn_damage} fire damage!{Style.RESET_ALL}")
+                time.sleep(0.5)
+        if self.burn_time <= 0 and self.is_player_burning == True:
+            self.is_player_burning = False
+            print(f"{Fore.LIGHTGREEN_EX}You are no longer on fire{Style.RESET_ALL}")
+
+    def is_debuffed(self):
+        if self.is_player_debuffed:
+            self.current_physical_multi -= 0.3
+            self.current_magic_multi -= 0.3
+            print(f"{Fore.MAGENTA}You are debuffed!{Style.RESET_ALL}")
+            self.debuff_time -= 1
+        if self.debuff_time <= 0 and self.is_player_debuffed == True:
+            self.is_player_debuffed = False
+            self.current_physical_multi = self.physical_multi
+            self.current_magic_multi = self.magic_multi
+            print(f"{Fore.LIGHTGREEN_EX}Your debuff has expired{Style.RESET_ALL}")
 
     def gain_xp(self, xp):
         self.xp += xp
@@ -188,9 +218,9 @@ class Player:
         weapon_data = item_database.get(self.equipped_weapon)
         weapon_damage = weapon_data['dmg']
         if weapon_data['type'] == 'physical':
-            damage_output = weapon_damage * self.physical_multi
+            damage_output = weapon_damage * self.current_physical_multi
         else:
-            damage_output = weapon_damage * self.magic_multi
+            damage_output = weapon_damage * self.current_magic_multi
         if target.weakness == weapon_data['type']:
             damage_output = damage_output * 1.5
             print(f"{Fore.MAGENTA}It's super effective!{Style.RESET_ALL}")

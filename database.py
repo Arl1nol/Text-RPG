@@ -55,3 +55,10 @@ enemy_database = {
     "Goblin": {'hp': (10, 20), 'damage': 7, 'coindrop': (10, 15), 'xp': (20, 40), 'weakness': 'magic',
                'rarity': 'common'},
 }
+
+trap_database = {
+    'Spike': {'damage': (15,25), 'type': 'physical'},
+    'Fire': {'damage': (10, 20), 'type': 'fire'},
+    'Coin': {'damage': (15,25), 'type': 'coin'},
+    'Debuff': {'damage': (5, 10), 'type': 'debuff'}
+}
