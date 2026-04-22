@@ -270,9 +270,9 @@ class Player:
         }
 
     def take_damage(self, enemy_attack):
-        typewriter(f"{Fore.RED}You took {enemy_attack} damage!{Style.RESET_ALL}")
         taken_damage = self.after_shield_damage(enemy_attack) if self.equipped_shield else enemy_attack
         self.hp -= taken_damage
+        typewriter(f"{Fore.RED}You took {taken_damage} damage!{Style.RESET_ALL}")
         time.sleep(0.5)
 
     def cast_spell(self, name, target):

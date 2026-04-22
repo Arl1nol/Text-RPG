@@ -66,9 +66,11 @@ class Enemy:
             self.freeze_time -= 1
             typewriter(f"{Fore.CYAN}The {self.name} can't attack because it's frozen{Style.RESET_ALL}")
             time.sleep(0.5)
-        if self.freeze_time <= 0:
-            self.can_i_attack = True
-            self.is_enemy_frozen = False
+            if self.freeze_time <= 0:
+                # Thaw at end of this skipped turn so enemy cannot act this same round.
+                self.is_enemy_frozen = False
+            return
+        self.can_i_attack = True
 
     def is_dead(self, player):
         if self.hp < 1:

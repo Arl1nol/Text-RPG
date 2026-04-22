@@ -59,9 +59,11 @@ class Boss:
             self.freeze_time -= 1
             typewriter(f"{Fore.CYAN}The {self.name} can't attack because it's frozen{Style.RESET_ALL}")
             time.sleep(0.5)
-        if self.freeze_time <= 0:
-            self.can_i_attack = True
-            self.is_enemy_frozen = False
+            if self.freeze_time <= 0:
+                # Thaw at end of this skipped turn so boss cannot act this same round.
+                self.is_enemy_frozen = False
+            return
+        self.can_i_attack = True
 
     def is_dead(self, player):
         if self.hp < 1:
@@ -89,12 +91,12 @@ class Boss:
                 self.special_attack_counter += 1
             elif self.special_attack_counter == 1:
                 damage = int(self.current_damage * 1.25)
-                p1.take_damage(damage)
-                self.hp += damage
                 shake_text(
                     f"{Fore.MAGENTA}The Lich{Style.RESET_ALL} unleashes a {Fore.RED}Bloody Domain!{Style.RESET_ALL}")
-                typewriter(
-                    f"It deals {Fore.RED}{damage}{Style.RESET_ALL} damage and heals him for {Fore.GREEN}{damage}{Style.RESET_ALL}")
+                p1.take_damage(damage)
+                self.hp += damage
+                typewriter(f"{Fore.MAGENTA}The Lich{Style.RESET_ALL} dealt {Fore.RED}{damage}{Style.RESET_ALL} damage "
+                           f"and healed for {Fore.GREEN}{damage}{Style.RESET_ALL}.")
                 self.special_attack_counter = 0
                 self.is_special_attack_active = False
 
