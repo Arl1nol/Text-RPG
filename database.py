@@ -46,14 +46,38 @@ item_database = {
 }
 
 enemy_database = {
-    "Dragon": {'hp': (500, 600), 'damage': 60, 'coindrop': (100, 120), 'xp': (1000, 1200), 'weakness': 'physical',
-               'rarity': 'legendary'},
-    "Cyclops": {'hp': (350, 420), 'damage': 10, 'coindrop': (40, 50), 'xp': (300, 400), 'weakness': 'none',
-                'rarity': 'rare'},
-    "Orc": {'hp': (20, 30), 'damage': 55, 'coindrop': (20, 30), 'xp': (100, 200), 'weakness': 'magic',
-            'rarity': 'uncommon'},
-    "Goblin": {'hp': (10, 20), 'damage': 7, 'coindrop': (10, 15), 'xp': (20, 40), 'weakness': 'magic',
-               'rarity': 'common'},
+    "Dragon": {
+        'hp': (220, 300),
+        'damage': 24,
+        'coindrop': (80, 130),
+        'xp': (420, 560),
+        'weakness': 'physical',
+        'rarity': 'legendary'
+    },
+    "Cyclops": {
+        'hp': (140, 190),
+        'damage': 18,
+        'coindrop': (45, 70),
+        'xp': (220, 320),
+        'weakness': 'magic',
+        'rarity': 'rare'
+    },
+    "Orc": {
+        'hp': (70, 100),
+        'damage': 12,
+        'coindrop': (20, 35),
+        'xp': (90, 140),
+        'weakness': 'magic',
+        'rarity': 'uncommon'
+    },
+    "Goblin": {
+        'hp': (30, 50),
+        'damage': 7,
+        'coindrop': (6, 16),
+        'xp': (25, 45),
+        'weakness': 'physical',
+        'rarity': 'common'
+    }
 }
 
 trap_database = {
@@ -61,4 +85,23 @@ trap_database = {
     'Fire': {'damage': (10, 20), 'type': 'fire'},
     'Coin': {'damage': (15,25), 'type': 'coin'},
     'Debuff': {'damage': (5, 10), 'type': 'debuff'}
+}
+
+boss_database = {
+    'Lich': {
+        'hp': (420, 560),
+        'damage': 26,
+        'coin_drop': (900, 1200),
+        'xp_gain': (650, 900),
+        'rarity': 'boss',
+        'weakness': 'physical'
+    },
+    'Dark Knight': {
+        'hp': (520, 700),
+        'damage': 22,
+        'coin_drop': (1050, 1400),
+        'xp_gain': (750, 1050),
+        'rarity': 'boss',
+        'weakness': 'magic'
+    }
 }

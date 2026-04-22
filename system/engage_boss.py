@@ -1,18 +1,34 @@
-from core.enemy import Enemy
+from core.boss import Boss
 from colorama import init, Fore, Style
 import time
 import questionary
 from database import item_database
-from helpers.type_writer import typewriter
+from helpers.type_writer import typewriter, boss_banner, shake_text, glitch_text
+from helpers.three_dots import tdt
 
 init()
 
 
-def engage_enemy(p1):
-    e1 = Enemy(p1)
+def engage_boss(p1):
+    e1 = Boss(p1)
     player_dead = False
 
-    typewriter(f'\n{Fore.RED}You encountered a {e1.name} (HP: {int(e1.hp)}/{e1.maxhp})!{Style.RESET_ALL}')
+    boss_banner(e1.name)
+    tdt()
+
+    if e1.name == 'Lich':
+        typewriter(f'\nYou open the gates to the {Fore.BLACK}{Style.BRIGHT}Underground Crypt...{Style.RESET_ALL}')
+        time.sleep(1)
+        glitch_text(f'"{Fore.LIGHTBLACK_EX}Mortals have no place in the halls of the eternal...{Style.RESET_ALL}"',
+                    speed=0.08)
+        tdt()
+
+    elif e1.name == 'Dark Knight':
+        shake_text(f'\nYou step into a {Fore.RED}blood-stained arena...{Style.RESET_ALL}')
+        time.sleep(1)
+        typewriter(f'The sound of heavy iron scraping against stone echoes through the room.')
+        typewriter(f'A towering warrior in black plate armor draws a massive Greatsword.')
+        tdt()
 
     while p1.hp > 0 and e1.hp > 0:
         choice = questionary.select("Your move:", choices=["Attack", "Use Item", "Equip Item", "Cast Spell"]).ask()
@@ -36,28 +52,33 @@ def engage_enemy(p1):
             else:
                 typewriter(f"{Fore.RED}Nothing to equip!{Style.RESET_ALL}")
         elif choice == 'Cast Spell':
-            spell_choice = questionary.select('What spell do you want to cast: ', choices=p1.spells).ask()
-            p1.cast_spell(spell_choice, e1)
+            if p1.spells:
+                spell_choice = questionary.select('What spell do you want to cast: ', choices=p1.spells).ask()
+                p1.cast_spell(spell_choice, e1)
+            else:
+                typewriter(f"{Fore.RED}You know no spells!{Style.RESET_ALL}")
 
         e1.is_burning()
         e1.is_debuffed()
         e1.is_frozen()
         e1.is_dead(p1)
-        p1.is_burning()
-        p1.is_debuffed()
-        if e1.is_alive:
-            typewriter(f"{e1.name} {Fore.RED}HP:{e1.hp}/{e1.maxhp}{Style.RESET_ALL}")
-        else:
+
+        if not e1.is_alive:
             p1.show_stats()
             break
 
+        p1.is_burning()
+        p1.is_debuffed()
+
+        typewriter(f"\n{e1.name} {Fore.RED}HP:{e1.hp}/{e1.maxhp}{Style.RESET_ALL}")
+
         if e1.can_i_attack:
-            e1.attack(p1)
+            e1.take_turn(p1)
 
         p1.show_stats()
 
         if p1.hp < 1:
-            typewriter(f"{Fore.RED}You died!!!{Style.RESET_ALL}", speed=0.1)
+            shake_text(f"{Fore.RED}YOU DIED!!!{Style.RESET_ALL}")
             player_dead = True
             break
 

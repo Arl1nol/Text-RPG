@@ -4,6 +4,8 @@ from colorama import init, Fore, Style
 from system.save_manager import load_save, saves
 from core.player import Player
 from system.play_engine import run_adventure
+from helpers.type_writer import typewriter
+
 init()
 
 p1 = None
@@ -12,35 +14,32 @@ if saves:
         time.sleep(1)
         chosen_save = questionary.select("Which save do you want to load:", choices=saves).ask()
         data = load_save(chosen_save)
-        p1 = Player(data['role'])
 
-        p1.level = data['level']
-        p1.xp = data['xp']
-        p1.xp_to_next_level = data['xp_to_next_level']
+        if data:
+            p1 = Player(data['role'])
+            p1.level = data['level']
+            p1.xp = data['xp']
+            p1.xp_to_next_level = data['xp_to_next_level']
+            p1.hp = data['hp']
+            p1.maxhp = data['maxhp']
+            p1.mana = data['mana']
+            p1.maxmana = data['maxmana']
+            p1.basemaxmana = data['basemaxmana']
+            p1.mana_regen = data['mana_regen']
+            p1.gold = data['gold']
+            p1.backpack = data['backpack']
+            p1.physical_multi = data['physical_multi']
+            p1.magic_multi = data['magic_multi']
+            p1.equipped_weapon = data['equipped_weapon']
+            p1.weapon_durability = data['weapon_durability']
+            p1.equipped_shield = data['equipped_shield']
+            p1.shield_durability = data['shield_durability']
+            p1.shield_overshield = data['shield_overshield']
+            p1.spelllevel = data['spelllevel']
+            p1.spells = data['spells']
 
-        p1.hp = data['hp']
-        p1.maxhp = data['maxhp']
-        p1.mana = data['mana']
-        p1.maxmana = data['maxmana']
-        p1.basemaxmana = data['basemaxmana']
-        p1.mana_regen = data['mana_regen']
+            typewriter(f"{Fore.GREEN}Data has been loaded successfully!{Style.RESET_ALL}")
 
-        p1.gold = data['gold']
-        p1.backpack = data['backpack']
-
-        p1.physical_multi = data['physical_multi']
-        p1.magic_multi = data['magic_multi']
-
-        p1.equipped_weapon = data['equipped_weapon']
-        p1.weapon_durability = data['weapon_durability']
-        p1.equipped_shield = data['equipped_shield']
-        p1.shield_durability = data['shield_durability']
-        p1.shield_overshield = data['shield_overshield']
-
-        p1.spelllevel = data['spelllevel']
-        p1.spells = data['spells']
-
-        print(f"{Fore.GREEN}Data has been loaded{Style.RESET_ALL}")
 if p1 is None:
     your_class = questionary.select("What class do you want to be?",
                                     choices=['Warrior', 'Mage', 'Tank', 'Battlemage']).ask()

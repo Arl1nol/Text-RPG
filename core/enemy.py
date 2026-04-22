@@ -2,18 +2,31 @@ from database import item_database, enemy_database
 import random
 from colorama import init, Fore, Style
 import time
+from helpers.type_writer import typewriter
+
 init()
 
 class Enemy:
-    def __init__(self):
+    def __init__(self, p1):
         enemy_keys = list(enemy_database.keys())
-        enemy_weights = [1, 4, 15, 80]
+        enemy_weights = []
+        if p1.level <= 3:
+            enemy_weights = [1, 8, 26, 65]
+        elif p1.level <= 5:
+            enemy_weights = [5, 18, 42, 35]
+        else:
+            enemy_weights = [12, 34, 34, 20]
         enemy = random.choices(enemy_keys, weights=enemy_weights, k=1)[0]
         enemy_stats = enemy_database.get(enemy)
         self.name = enemy
-        self.maxhp = random.randint(*enemy_stats['hp'])
+        rarity_hp_scale = {'common': 0.95, 'uncommon': 1.0, 'rare': 1.08, 'legendary': 1.16}
+        rarity_damage_scale = {'common': 0.95, 'uncommon': 1.0, 'rare': 1.1, 'legendary': 1.2}
+        level_hp_scale = 1 + max(0, p1.level - 1) * 0.09
+        level_damage_scale = 1 + max(0, p1.level - 1) * 0.06
+        rarity = enemy_stats['rarity']
+        self.maxhp = int(random.randint(*enemy_stats['hp']) * level_hp_scale * rarity_hp_scale[rarity])
         self.hp = self.maxhp
-        self.base_damage = enemy_stats['damage']
+        self.base_damage = int(enemy_stats['damage'] * level_damage_scale * rarity_damage_scale[rarity])
         self.current_damage = self.base_damage
         self.coindrop = random.randint(*enemy_stats['coindrop'])
         self.xpdrop = random.randint(*enemy_stats['xp'])
@@ -33,7 +46,7 @@ class Enemy:
                 burn_damage = int(self.maxhp * 0.1)
                 self.hp -= burn_damage
                 self.burn_time -= 1
-                print(f"{Fore.RED}The {self.name} took {burn_damage} fire damage!{Style.RESET_ALL}")
+                typewriter(f"{Fore.RED}The {self.name} took {burn_damage} fire damage!{Style.RESET_ALL}")
                 time.sleep(0.5)
         if self.burn_time <= 0:
             self.is_enemy_burning = False
@@ -41,7 +54,7 @@ class Enemy:
     def is_debuffed(self):
         if self.is_enemy_debuffed:
             self.current_damage = int(self.base_damage * 0.8)
-            print(f"{Fore.MAGENTA}The enemy is debuffed!{Style.RESET_ALL}")
+            typewriter(f"{Fore.MAGENTA}The {self.name} is debuffed!{Style.RESET_ALL}")
             self.debuff_time -= 1
         if self.debuff_time <= 0:
             self.is_enemy_debuffed = False
@@ -51,7 +64,7 @@ class Enemy:
         if self.is_enemy_frozen:
             self.can_i_attack = False
             self.freeze_time -= 1
-            print(f"{Fore.CYAN}The {self.name} cant attack because its frozen{Style.RESET_ALL}")
+            typewriter(f"{Fore.CYAN}The {self.name} can't attack because it's frozen{Style.RESET_ALL}")
             time.sleep(0.5)
         if self.freeze_time <= 0:
             self.can_i_attack = True
@@ -60,17 +73,17 @@ class Enemy:
     def is_dead(self, player):
         if self.hp < 1:
             self.is_alive = False
-            print(f"{Fore.GREEN}The {self.name} has been defeated!!!{Style.RESET_ALL}")
-            print(f"{Fore.YELLOW}You gained {self.coindrop} coins\n{Style.RESET_ALL}")
+            typewriter(f"{Fore.GREEN}The {self.name} has been defeated!!!{Style.RESET_ALL}")
+            typewriter(f"You gained {Fore.YELLOW}{self.coindrop} coins\n{Style.RESET_ALL}")
             player.gold += self.coindrop
             player.gain_xp(self.xpdrop)
             dropped_item = self.drop_item()
             player.backpack.append(dropped_item)
-            print(f"{Fore.YELLOW}{dropped_item} was found and added to your backpack{Style.RESET_ALL}")
+            typewriter(f"{Fore.MAGENTA}{dropped_item}{Style.RESET_ALL} was found and added to your backpack")
 
     def attack(self, target):
         time.sleep(0.5)
-        print(f"\n{Fore.RED}The {self.name} strikes!{Style.RESET_ALL}")
+        typewriter(f"\n{Fore.RED}The {self.name} strikes!{Style.RESET_ALL}")
         dealt_damage = int(self.current_damage + self.current_damage * random.uniform(-0.2, 0.2))
         target.take_damage(dealt_damage)
 
