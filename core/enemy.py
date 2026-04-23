@@ -24,6 +24,8 @@ class Enemy:
         level_hp_scale = 1 + max(0, p1.level - 1) * 0.09
         level_damage_scale = 1 + max(0, p1.level - 1) * 0.06
         rarity = enemy_stats['rarity']
+        self.name_color = enemy_stats.get('name_color', 'WHITE').upper()
+        self.name_display = f"{getattr(Fore, self.name_color, Fore.WHITE)}{self.name}{Style.RESET_ALL}"
         self.maxhp = int(random.randint(*enemy_stats['hp']) * level_hp_scale * rarity_hp_scale[rarity])
         self.hp = self.maxhp
         self.base_damage = int(enemy_stats['damage'] * level_damage_scale * rarity_damage_scale[rarity])
@@ -46,7 +48,7 @@ class Enemy:
                 burn_damage = int(self.maxhp * 0.1)
                 self.hp -= burn_damage
                 self.burn_time -= 1
-                typewriter(f"{Fore.RED}The {self.name} took {burn_damage} fire damage!{Style.RESET_ALL}")
+                typewriter(f"The {self.name_display} took {Fore.RED}{burn_damage} fire damage!{Style.RESET_ALL}")
                 time.sleep(0.5)
         if self.burn_time <= 0:
             self.is_enemy_burning = False
@@ -54,7 +56,7 @@ class Enemy:
     def is_debuffed(self):
         if self.is_enemy_debuffed:
             self.current_damage = int(self.base_damage * 0.8)
-            typewriter(f"{Fore.MAGENTA}The {self.name} is debuffed!{Style.RESET_ALL}")
+            typewriter(f"The {self.name_display} is {Fore.MAGENTA}debuffed{Style.RESET_ALL}!")
             self.debuff_time -= 1
         if self.debuff_time <= 0:
             self.is_enemy_debuffed = False
@@ -64,7 +66,7 @@ class Enemy:
         if self.is_enemy_frozen:
             self.can_i_attack = False
             self.freeze_time -= 1
-            typewriter(f"{Fore.CYAN}The {self.name} can't attack because it's frozen{Style.RESET_ALL}")
+            typewriter(f"The {self.name_display} can't attack because it's {Fore.CYAN}frozen{Style.RESET_ALL}.")
             time.sleep(0.5)
             if self.freeze_time <= 0:
                 # Thaw at end of this skipped turn so enemy cannot act this same round.
@@ -75,7 +77,7 @@ class Enemy:
     def is_dead(self, player):
         if self.hp < 1:
             self.is_alive = False
-            typewriter(f"{Fore.GREEN}The {self.name} has been defeated!!!{Style.RESET_ALL}")
+            typewriter(f"The {self.name_display} has been {Fore.GREEN}defeated{Style.RESET_ALL}!!!")
             typewriter(f"You gained {Fore.YELLOW}{self.coindrop} coins\n{Style.RESET_ALL}")
             player.gold += self.coindrop
             player.gain_xp(self.xpdrop)
@@ -85,7 +87,7 @@ class Enemy:
 
     def attack(self, target):
         time.sleep(0.5)
-        typewriter(f"\n{Fore.RED}The {self.name} strikes!{Style.RESET_ALL}")
+        typewriter(f"\nThe {self.name_display} {Fore.RED}strikes{Style.RESET_ALL}!")
         dealt_damage = int(self.current_damage + self.current_damage * random.uniform(-0.2, 0.2))
         target.take_damage(dealt_damage)
 

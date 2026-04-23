@@ -34,7 +34,7 @@ def save_adventure(save, saved_stats):
     typewriter(f"{Fore.GREEN}Game has been saved to {save}{Style.RESET_ALL}")
 
 
-def save_run(p1):
+def save_run(p1, current_floor=0):
     if questionary.select("Do you want to save this adventure?", choices=['Yes', 'No']).ask() == 'Yes':
         selected_save = ''
         current_saves = glob.glob('saves/save_*.json')
@@ -53,6 +53,7 @@ def save_run(p1):
 
         if selected_save:
             stat_save = p1.convert_to_dic()
+            stat_save["current_floor"] = current_floor
             save_adventure(selected_save, stat_save)
 
     tdt()

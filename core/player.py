@@ -133,7 +133,7 @@ class Player:
             self.spells = [name for name, data in self.SPELL_DATABASE.items() if data['level'] <= self.spelllevel]
             added_spells = [name for name, data in self.SPELL_DATABASE.items() if data['level'] == self.spelllevel]
             typewriter(f"The spells {Fore.MAGENTA}{added_spells}{Style.RESET_ALL} have been added to your inventory")
-        elif self.level == 5:
+        elif self.level == 7:
             self.spelllevel = 3
             self.spells = [name for name, data in self.SPELL_DATABASE.items() if data['level'] <= self.spelllevel]
             added_spells = [name for name, data in self.SPELL_DATABASE.items() if data['level'] == self.spelllevel]
@@ -217,10 +217,11 @@ class Player:
             return
         weapon_data = item_database.get(self.equipped_weapon)
         weapon_damage = weapon_data['dmg']
-        multi = self.current_physical_multi if weapon_data['type'] == 'physical' else self.current_magic_multi
+        # Basic weapon swings are always treated as physical damage.
+        multi = self.current_physical_multi
         damage_output = int(weapon_damage * multi)
 
-        if target.weakness == weapon_data['type']:
+        if target.weakness == 'physical':
             damage_output = int(damage_output * 1.5)
             typewriter(f"{Fore.MAGENTA}It's super effective!{Style.RESET_ALL}")
 
@@ -272,14 +273,16 @@ class Player:
     def take_damage(self, enemy_attack):
         taken_damage = self.after_shield_damage(enemy_attack) if self.equipped_shield else enemy_attack
         self.hp -= taken_damage
-        typewriter(f"{Fore.RED}You took {taken_damage} damage!{Style.RESET_ALL}")
+        typewriter(f"You took {Fore.RED}{taken_damage} damage{Style.RESET_ALL}!")
         time.sleep(0.5)
 
     def cast_spell(self, name, target):
         added_damage = 1
+        is_weakness_hit = False
         spell_data = self.SPELL_DATABASE.get(name)
         if target.weakness == 'magic' and not spell_data['type'] == 'heal':
             added_damage = 1.5
+            is_weakness_hit = True
         if not spell_data or self.mana < spell_data['mana']:
             typewriter(f"{Fore.RED}Not enough mana!{Style.RESET_ALL}")
             return
@@ -303,4 +306,6 @@ class Player:
             target.can_i_attack = False
 
         target.hp -= damage
+        if is_weakness_hit:
+            typewriter(f"{Fore.MAGENTA}It's super effective!{Style.RESET_ALL}")
         typewriter(f"{Fore.RED}{name}{Style.RESET_ALL} cast! {target.name} took {damage} damage!")

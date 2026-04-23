@@ -13,7 +13,7 @@ def engage_boss(p1):
     e1 = Boss(p1)
     player_dead = False
 
-    boss_banner(e1.name)
+    boss_banner(e1.name_display)
     tdt()
 
     if e1.name == 'Lich':
@@ -70,7 +70,7 @@ def engage_boss(p1):
         p1.is_burning()
         p1.is_debuffed()
 
-        typewriter(f"\n{e1.name} {Fore.RED}HP:{e1.hp}/{e1.maxhp}{Style.RESET_ALL}")
+        typewriter(f"\n{e1.name_display} {Fore.RED}HP:{e1.hp}/{e1.maxhp}{Style.RESET_ALL}")
 
         if e1.can_i_attack:
             e1.take_turn(p1)

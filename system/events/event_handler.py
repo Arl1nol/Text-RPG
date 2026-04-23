@@ -1,8 +1,7 @@
-import glob
 import random
-from system.encounter_chest import encounter_chest
-from system.encounter_trap import trigger_trap
-from system.encounter_merchant import open_merchant
+from system.events.encounter_chest import encounter_chest
+from system.events.encounter_trap import trigger_trap
+from system.events.encounter_merchant import open_merchant
 
 def encounter_event(p1, time_without_event):
     twe = time_without_event

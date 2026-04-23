@@ -1,22 +1,17 @@
-import random
 import questionary
-import time
-from system.encounter_trap import trigger_trap
-from system.event_handler import encounter_event
+from system.events.event_handler import encounter_event
 from system.save_manager import save_run
 from helpers.three_dots import tdt
-from system.engage_enemy import engage_enemy
-from system.encounter_merchant import open_merchant
+from system.engage.engage_enemy import engage_enemy
 from helpers.type_writer import typewriter
-from system.engage_boss import engage_boss
-from system.encounter_chest import encounter_chest
+from system.engage.engage_boss import engage_boss
 
 
-def run_adventure(p1):
+def run_adventure(p1, start_floor=0):
     typewriter("You go down the path")
     tdt()
     time_without_event = 0
-    current_floor = 0
+    current_floor = max(0, start_floor)
     while True:
         current_floor += 1
 
@@ -37,7 +32,7 @@ def run_adventure(p1):
 
         choice = questionary.select("Continue?", choices=['Yes', 'No']).ask()
         if choice == 'No':
-            save_run(p1)
+            save_run(p1, current_floor)
             break
 
         typewriter("Moving deeper into the dungeon...")

@@ -52,7 +52,8 @@ enemy_database = {
         'coindrop': (80, 130),
         'xp': (420, 560),
         'weakness': 'physical',
-        'rarity': 'legendary'
+        'rarity': 'legendary',
+        'name_color': 'RED'
     },
     "Cyclops": {
         'hp': (140, 190),
@@ -60,7 +61,8 @@ enemy_database = {
         'coindrop': (45, 70),
         'xp': (220, 320),
         'weakness': 'magic',
-        'rarity': 'rare'
+        'rarity': 'rare',
+        'name_color': 'GREEN'
     },
     "Orc": {
         'hp': (70, 100),
@@ -68,7 +70,8 @@ enemy_database = {
         'coindrop': (20, 35),
         'xp': (90, 140),
         'weakness': 'magic',
-        'rarity': 'uncommon'
+        'rarity': 'uncommon',
+        'name_color': 'LIGHTBLACK_EX'
     },
     "Goblin": {
         'hp': (30, 50),
@@ -76,7 +79,8 @@ enemy_database = {
         'coindrop': (6, 16),
         'xp': (25, 45),
         'weakness': 'physical',
-        'rarity': 'common'
+        'rarity': 'common',
+        'name_color': 'GREEN'
     }
 }
 
@@ -94,7 +98,8 @@ boss_database = {
         'coin_drop': (900, 1200),
         'xp_gain': (650, 900),
         'rarity': 'boss',
-        'weakness': 'physical'
+        'weakness': 'physical',
+        'name_color': 'MAGENTA'
     },
     'Dark Knight': {
         'hp': (520, 700),
@@ -102,6 +107,7 @@ boss_database = {
         'coin_drop': (1050, 1400),
         'xp_gain': (750, 1050),
         'rarity': 'boss',
-        'weakness': 'magic'
+        'weakness': 'magic',
+        'name_color': 'BLACK'
     }
 }

@@ -12,7 +12,7 @@ def engage_enemy(p1):
     e1 = Enemy(p1)
     player_dead = False
 
-    typewriter(f'\n{Fore.RED}You encountered a {e1.name} (HP: {int(e1.hp)}/{e1.maxhp})!{Style.RESET_ALL}')
+    typewriter(f'\nYou encountered a {e1.name_display} (HP: {int(e1.hp)}/{e1.maxhp})!')
 
     while p1.hp > 0 and e1.hp > 0:
         choice = questionary.select("Your move:", choices=["Attack", "Use Item", "Equip Item", "Cast Spell"]).ask()
@@ -46,7 +46,7 @@ def engage_enemy(p1):
         p1.is_burning()
         p1.is_debuffed()
         if e1.is_alive:
-            typewriter(f"{e1.name} {Fore.RED}HP:{e1.hp}/{e1.maxhp}{Style.RESET_ALL}")
+            typewriter(f"{e1.name_display} {Fore.RED}HP:{e1.hp}/{e1.maxhp}{Style.RESET_ALL}")
         else:
             p1.show_stats()
             break

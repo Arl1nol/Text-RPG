@@ -9,6 +9,7 @@ from helpers.type_writer import typewriter
 init()
 
 p1 = None
+start_floor = 0
 if saves:
     if questionary.select("Do you want to load an existing save?", choices=['Yes', "No"]).ask() == 'Yes':
         time.sleep(1)
@@ -37,6 +38,7 @@ if saves:
             p1.shield_overshield = data['shield_overshield']
             p1.spelllevel = data['spelllevel']
             p1.spells = data['spells']
+            start_floor = data.get('current_floor', 0)
 
             typewriter(f"{Fore.GREEN}Data has been loaded successfully!{Style.RESET_ALL}")
 
@@ -45,4 +47,4 @@ if p1 is None:
                                     choices=['Warrior', 'Mage', 'Tank', 'Battlemage']).ask()
     p1 = Player(your_class)
 
-run_adventure(p1)
+run_adventure(p1, start_floor=start_floor)
