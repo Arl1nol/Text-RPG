@@ -34,6 +34,9 @@ class Boss:
         self.turn_count = 0
         self.is_special_attack_active = False
         self.special_attack_counter = 0
+        self.boss_phase = 1
+        self.damage_negation = 0
+        self.immunity = []
 
     def is_burning(self):
         if self.is_enemy_burning:
@@ -56,13 +59,14 @@ class Boss:
             self.current_damage = self.base_damage
 
     def is_frozen(self):
+        if 'freeze' in self.immunity:
+            self.is_enemy_frozen = False
         if self.is_enemy_frozen:
             self.can_i_attack = False
             self.freeze_time -= 1
             typewriter(f"The {self.name_display} can't attack because it's {Fore.CYAN}frozen{Style.RESET_ALL}.")
             time.sleep(0.5)
             if self.freeze_time <= 0:
-                # Thaw at end of this skipped turn so boss cannot act this same round.
                 self.is_enemy_frozen = False
             return
         self.can_i_attack = True
@@ -84,23 +88,62 @@ class Boss:
     def activate_special_attack(self):
         self.is_special_attack_active = True
 
+    def take_damage(self, damage):
+        damage_output = damage * self.damage_negation
+        self.hp -= damage_output
+        self.hp = max(self.hp,0)
+        self.check_phase_transition()
+        if not self.damage_negation == 0:
+            typewriter(f"{Fore.LIGHTRED_EX}{(1-self.damage_negation) * 100}% of the damage was negated{Style.RESET_ALL}")
+        typewriter(f"{Fore.YELLOW}You dealt {damage_output} damage to the {self.name}!{Style.RESET_ALL}")
+
+
+    def check_phase_transition(self):
+        if self.name == 'Lich':
+            if self.hp / self.maxhp <= 0.7:
+                if self.boss_phase == 2:
+                    return
+                else:
+                    self.boss_phase = 2
+                    self.current_damage += self.base_damage * 0.3
+            elif self.hp <= 0:
+                if self.boss_phase == 3:
+                    return
+                else:
+                    self.boss_phase = 3
+                    self.hp = self.maxhp * 0.5
+        elif self.name == 'Dark Knight':
+            if self.hp / self.maxhp <= 0.5:
+                if self.boss_phase == 2:
+                    return
+                else:
+                    self.boss_phase = 2
+                    self.damage_negation = 0.7
+                    self.current_damage += self.base_damage * 0.3
+                    self.immunity.append('freeze')
+
+
+
     def special_attack(self, p1):
         if self.name == 'Lich':
-            if self.special_attack_counter == 0:
-                glitch_text(
-                    f"You feel the air gets dryer around you as {self.name_display} prepares a soul-drain...",
-                    speed=0.06)
-                self.special_attack_counter += 1
-            elif self.special_attack_counter == 1:
-                damage = int(self.current_damage * 1.25)
-                shake_text(
-                    f"{self.name_display} unleashes a {Fore.RED}Bloody Domain!{Style.RESET_ALL}")
-                p1.take_damage(damage)
-                self.hp += damage
-                typewriter(f"{self.name_display} dealt {Fore.RED}{damage}{Style.RESET_ALL} damage "
-                           f"and healed for {Fore.GREEN}{damage}{Style.RESET_ALL}.")
-                self.special_attack_counter = 0
-                self.is_special_attack_active = False
+            if self.boss_phase == 1:
+                self.attack
+            elif self.boss_phase == 2:
+                if self.special_attack_counter == 0:
+                    glitch_text(
+                        f"You feel the air gets dryer around you as {self.name_display} prepares a soul-drain...",
+                        speed=0.06)
+                    self.special_attack_counter += 1
+                elif self.special_attack_counter == 1:
+                    damage = int(self.current_damage * 1.25)
+                    shake_text(
+                        f"{self.name_display} unleashes a {Fore.RED}Bloody Domain!{Style.RESET_ALL}")
+                    p1.take_damage(damage)
+                    self.hp += damage
+                    typewriter(f"{self.name_display} dealt {Fore.RED}{damage}{Style.RESET_ALL} damage "
+                            f"and healed for {Fore.GREEN}{damage}{Style.RESET_ALL}.")
+                    self.special_attack_counter = 0
+                    self.is_special_attack_active = False
 
         elif self.name == "Dark Knight":
             if self.special_attack_counter == 0:

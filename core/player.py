@@ -211,13 +211,8 @@ class Player:
             self.equipped_shield = ''
 
     def attack(self, target):
-        if not self.equipped_weapon:
-            target.hp -= 2
-            typewriter(f"\n{Fore.YELLOW}You dealt 2 damage with your fists!{Style.RESET_ALL}")
-            return
         weapon_data = item_database.get(self.equipped_weapon)
         weapon_damage = weapon_data['dmg']
-        # Basic weapon swings are always treated as physical damage.
         multi = self.current_physical_multi
         damage_output = int(weapon_damage * multi)
 
@@ -225,12 +220,11 @@ class Player:
             damage_output = int(damage_output * 1.5)
             typewriter(f"{Fore.MAGENTA}It's super effective!{Style.RESET_ALL}")
 
-        target.hp -= damage_output
-        typewriter(f"{Fore.YELLOW}You dealt {damage_output} damage to the {target.name}!{Style.RESET_ALL}")
-
         if weapon_data['rarity'] != 'common':
             self.weapon_durability -= 1
             self.is_item_broken()
+
+        target.take_damage(damage_output)
 
     def after_shield_damage(self, enemy_attack):
         shield_info = item_database.get(self.equipped_shield)
