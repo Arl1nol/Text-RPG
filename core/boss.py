@@ -37,6 +37,7 @@ class Boss:
         self.boss_phase = 1
         self.damage_negation = 0
         self.immunity = []
+        self.special_attack_chance = 0.2
 
     def is_burning(self):
         if self.is_enemy_burning:
@@ -89,12 +90,12 @@ class Boss:
         self.is_special_attack_active = True
 
     def take_damage(self, damage):
-        damage_output = damage * self.damage_negation
+        damage_output = int(damage * (1 - self.damage_negation))
         self.hp -= damage_output
         self.hp = max(self.hp,0)
         self.check_phase_transition()
         if not self.damage_negation == 0:
-            typewriter(f"{Fore.LIGHTRED_EX}{(1-self.damage_negation) * 100}% of the damage was negated{Style.RESET_ALL}")
+            typewriter(f"{Fore.LIGHTRED_EX}{(self.damage_negation) * 100}% of the damage was negated{Style.RESET_ALL}")
         typewriter(f"{Fore.YELLOW}You dealt {damage_output} damage to the {self.name}!{Style.RESET_ALL}")
 
 
@@ -112,22 +113,26 @@ class Boss:
                 else:
                     self.boss_phase = 3
                     self.hp = self.maxhp * 0.5
+                    self.special_attack_counter += 1
+                    self.special_attack_counter = 0
         elif self.name == 'Dark Knight':
             if self.hp / self.maxhp <= 0.5:
                 if self.boss_phase == 2:
                     return
                 else:
                     self.boss_phase = 2
-                    self.damage_negation = 0.7
+                    self.damage_negation = 0.3
                     self.current_damage += self.base_damage * 0.3
                     self.immunity.append('freeze')
+                    self.special_attack_chance += 0.2
+                    self.special_attack_counter = 0
 
 
 
     def special_attack(self, p1):
         if self.name == 'Lich':
             if self.boss_phase == 1:
-                self.attack
+                self.attack(p1)
             elif self.boss_phase == 2:
                 if self.special_attack_counter == 0:
                     glitch_text(
@@ -144,6 +149,17 @@ class Boss:
                             f"and healed for {Fore.GREEN}{damage}{Style.RESET_ALL}.")
                     self.special_attack_counter = 0
                     self.is_special_attack_active = False
+            elif self.boss_phase == 3:
+                if self.special_attack_counter == 0:
+                    glitch_text("The litch gets ready")
+                    self.special_attack_counter += 1
+                elif self.special_attack_counter == 1:
+                    glitch_text("The lich get more ready")
+                elif self.special_attack_counter == 2:
+                    glitch_text("The lich is ready to explode")
+                elif self.special_attack_counter == 3:
+                    glitch_text("The lich explodes")
+                    p1.take_damage(9999)
 
         elif self.name == "Dark Knight":
             if self.special_attack_counter == 0:
@@ -164,7 +180,7 @@ class Boss:
     def take_turn(self, p1):
         if self.is_special_attack_active:
             self.special_attack(p1)
-        elif random.random() <= 0.2:
+        elif random.random() <= self.special_attack_chance:
             self.activate_special_attack()
             self.special_attack(p1)
         else:

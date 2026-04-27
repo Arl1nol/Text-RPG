@@ -41,6 +41,7 @@ class Enemy:
         self.debuff_time = 0
         self.can_i_attack = True
         self.is_alive = True
+        self.damage_negation = 0
 
     def is_burning(self):
         if self.is_enemy_burning:
@@ -89,6 +90,16 @@ class Enemy:
         typewriter(f"\nThe {self.name_display} {Fore.RED}strikes{Style.RESET_ALL}!")
         dealt_damage = int(self.current_damage + self.current_damage * random.uniform(-0.2, 0.2))
         target.take_damage(dealt_damage)
+
+    def take_damage(self, damage):
+        damage_output = damage * self.damage_negation
+        self.hp -= damage_output
+        self.hp = max(self.hp,0)
+        self.check_phase_transition()
+        if not self.damage_negation == 0:
+            typewriter(f"{Fore.LIGHTRED_EX}{(1-self.damage_negation) * 100}% of the damage was negated{Style.RESET_ALL}")
+        typewriter(f"{Fore.YELLOW}You dealt {damage_output} damage to the {self.name}!{Style.RESET_ALL}")
+
 
     def drop_item(self):
         enemy_rarity = enemy_database[self.name]['rarity']
