@@ -299,7 +299,8 @@ class Player:
             target.is_enemy_frozen = True
             target.can_i_attack = False
 
-        target.hp -= damage
         if is_weakness_hit:
             typewriter(f"{Fore.MAGENTA}It's super effective!{Style.RESET_ALL}")
-        typewriter(f"{Fore.RED}{name}{Style.RESET_ALL} cast! {target.name} took {damage} damage!")
+        typewriter(f"{Fore.RED}{name}{Style.RESET_ALL} cast!")
+        
+        target.take_damage(damage)

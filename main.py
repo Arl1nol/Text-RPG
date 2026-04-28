@@ -5,11 +5,14 @@ from system.save_manager import load_save, saves
 from core.player import Player
 from system.play_engine import run_adventure
 from helpers.type_writer import typewriter
-
+from system.engage.engage_boss import engage_boss
 init()
 
 p1 = None
 start_floor = 0
+if __name__ == '__main__':
+    p1 = Player('Mage')
+    engage_boss(p1)
 if saves:
     if questionary.select("Do you want to load an existing save?", choices=['Yes', "No"]).ask() == 'Yes':
         time.sleep(1)
