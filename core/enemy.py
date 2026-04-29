@@ -42,6 +42,7 @@ class Enemy:
         self.can_i_attack = True
         self.is_alive = True
         self.damage_negation = 0
+        self.debuff_applied = False
 
     def is_burning(self):
         if self.is_enemy_burning:
@@ -54,14 +55,29 @@ class Enemy:
         if self.burn_time <= 0:
             self.is_enemy_burning = False
 
-    def is_debuffed(self):
+    def apply_stat_gain(self, amount):
+        """Standardizes how damage is added, even for regular enemies."""
         if self.is_enemy_debuffed:
-            self.current_damage = int(self.base_damage * 0.8)
-            typewriter(f"The {self.name_display} is {Fore.MAGENTA}debuffed{Style.RESET_ALL}!")
-            self.debuff_time -= 1
-        if self.debuff_time <= 0:
+            self.current_damage += int(amount * 0.8)
+        else:
+            self.current_damage += int(amount)
+
+    def is_debuffed(self):
+        # 1. Handle Expiration
+        if self.debuff_time <= 0 and self.is_enemy_debuffed:
             self.is_enemy_debuffed = False
-            self.current_damage = self.base_damage
+            if self.debuff_applied:
+                self.current_damage = int(self.current_damage / 0.8)
+                self.debuff_applied = False 
+            typewriter(f"The {self.name_display} regains its strength!")
+
+        # 2. Handle Active Debuff
+        if self.is_enemy_debuffed:
+            if not self.debuff_applied:
+                self.current_damage = int(self.current_damage * 0.8)
+                self.debuff_applied = True          
+            typewriter(f"The {self.name_display} is {Fore.MAGENTA}weakened{Style.RESET_ALL}!")
+            self.debuff_time -= 1
 
     def is_frozen(self):
         if self.is_enemy_frozen:
@@ -92,14 +108,12 @@ class Enemy:
         target.take_damage(dealt_damage)
 
     def take_damage(self, damage):
-        damage_output = damage * self.damage_negation
+        damage_output = damage * (1-self.damage_negation)
         self.hp -= damage_output
-        self.hp = max(self.hp,0)
-        self.check_phase_transition()
+        self.hp = max(self.hp, 0)
         if not self.damage_negation == 0:
-            typewriter(f"{Fore.LIGHTRED_EX}{(1-self.damage_negation) * 100}% of the damage was negated{Style.RESET_ALL}")
+            typewriter(f"{Fore.LIGHTRED_EX}{self.damage_negation * 100}% of the damage was negated{Style.RESET_ALL}")
         typewriter(f"{Fore.YELLOW}You dealt {damage_output} damage to the {self.name}!{Style.RESET_ALL}")
-
 
     def drop_item(self):
         enemy_rarity = enemy_database[self.name]['rarity']

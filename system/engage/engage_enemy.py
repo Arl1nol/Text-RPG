@@ -9,6 +9,8 @@ init()
 
 
 def engage_enemy(p1):
+    p1.is_burning()
+    p1.is_debuffed()
     e1 = Enemy(p1)
     player_dead = False
 
@@ -43,8 +45,6 @@ def engage_enemy(p1):
         e1.is_debuffed()
         e1.is_frozen()
         e1.is_dead(p1)
-        p1.is_burning()
-        p1.is_debuffed()
         if e1.is_alive:
             typewriter(f"{e1.name_display} {Fore.RED}HP:{e1.hp}/{e1.maxhp}{Style.RESET_ALL}")
         else:

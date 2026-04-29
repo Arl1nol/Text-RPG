@@ -10,6 +10,8 @@ init()
 
 
 def engage_boss(p1):
+    p1.is_burning()
+    p1.is_debuffed()
     e1 = Boss(p1)
     player_dead = False
 
@@ -66,9 +68,6 @@ def engage_boss(p1):
         if not e1.is_alive:
             p1.show_stats()
             break
-
-        p1.is_burning()
-        p1.is_debuffed()
 
         typewriter(f"\n{e1.name_display} {Fore.RED}HP:{e1.hp}/{e1.maxhp}{Style.RESET_ALL}")
 

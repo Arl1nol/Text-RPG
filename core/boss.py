@@ -3,7 +3,7 @@ import time
 import sys
 from colorama import Fore, Style
 from database import item_database, boss_database
-from helpers.type_writer import typewriter, shake_text, glitch_text, boss_banner
+from helpers.type_writer import typewriter, shake_text, glitch_text, display_health_damage, display_health_heal
 
 class Boss:
     def __init__(self, p1):
@@ -44,29 +44,42 @@ class Boss:
         self.damage_negation = 0
         self.immunity = []
         self.special_attack_chance = 0.2
-
-        # Intro Banner
-        boss_banner(self.name)
+        self.debuff_applied = False
 
     def is_burning(self):
         if self.is_enemy_burning:
             if self.hp > 0:
                 burn_damage = int(self.maxhp * 0.04)
-                self.hp -= burn_damage
+                self.take_damage(burn_damage)
                 self.burn_time -= 1
                 typewriter(f"The {self.name_display} sizzles! Took {Fore.RED}{burn_damage} fire damage!{Style.RESET_ALL}")
                 time.sleep(0.5)
         if self.burn_time <= 0:
             self.is_enemy_burning = False
 
-    def is_debuffed(self):
+    def apply_stat_gain(self, amount):
+        """Helper to add damage while respecting active debuffs."""
         if self.is_enemy_debuffed:
-            self.current_damage = int(self.base_damage * 0.8)
-            typewriter(f"The {self.name_display} is {Fore.MAGENTA}weakened{Style.RESET_ALL} by your magic!")
-            self.debuff_time -= 1
-        if self.debuff_time <= 0:
+            self.current_damage += int(amount * 0.8)
+        else:
+            self.current_damage += int(amount)
+
+    def is_debuffed(self):
+        # 1. Check for expiration first
+        if self.debuff_time <= 0 and self.is_enemy_debuffed:
             self.is_enemy_debuffed = False
-            self.current_damage = self.base_damage
+            if self.debuff_applied:
+                self.current_damage = int(self.current_damage / 0.8)
+                self.debuff_applied = False 
+            typewriter(f"The {self.name_display} regains its strength!")
+
+        # 2. Apply logic if debuffed
+        if self.is_enemy_debuffed:
+            if not self.debuff_applied:
+                self.current_damage = int(self.current_damage * 0.8)
+                self.debuff_applied = True          
+            typewriter(f"The {self.name_display} is {Fore.MAGENTA}weakened{Style.RESET_ALL}!")
+            self.debuff_time -= 1
 
     def is_frozen(self):
         if 'freeze' in self.immunity:
@@ -81,6 +94,15 @@ class Boss:
             return
         self.can_i_attack = True
 
+    def drop_item(self):
+        item_types = list(set(data['type'] for data in item_database.values()))
+        chosen_type = random.choice(item_types)
+        chosen_drops = {name: data for name, data in item_database.items() if data['type'] == chosen_type}
+        chosen_drop_pool = {name: data for name, data in chosen_drops.items() if data['rarity'] == 'legendary'}
+        if not chosen_drop_pool:
+            return "apple"
+        return random.choice(list(chosen_drop_pool.keys()))
+
     def is_dead(self, player):
         if self.hp < 1:
             self.is_alive = False
@@ -88,6 +110,9 @@ class Boss:
             typewriter(f"{Fore.YELLOW}Loot Found: {self.coindrop} coins{Style.RESET_ALL}")
             player.gold += self.coindrop
             player.gain_xp(self.xpdrop)
+            dropped_item = self.drop_item()
+            player.backpack.append(dropped_item)
+            typewriter(f"{Fore.MAGENTA}{dropped_item}{Style.RESET_ALL} was found and added to your backpack")
 
     def attack(self, target):
         time.sleep(0.5)
@@ -100,23 +125,28 @@ class Boss:
 
     def take_damage(self, damage):
         damage_output = int(damage * (1 - self.damage_negation))
-        self.hp -= damage_output
-        self.hp = max(self.hp, 0)
-        
         if self.damage_negation > 0:
             typewriter(f"{Fore.CYAN}The blow is deflected! {(self.damage_negation) * 100}% damage reduced.{Style.RESET_ALL}")
         
         typewriter(f"{Fore.YELLOW}>>{damage_output} damage dealt to {self.name}!{Style.RESET_ALL}")
+        display_health_damage( self.hp,self.maxhp, damage)
+        self.hp -= damage_output
+        self.hp = max(self.hp, 0)
         self.check_phase_transition()
 
     def check_phase_transition(self):
+        # Calculate standard bonus
+        bonus = self.base_damage * 0.3
+
         if self.name == 'Lich':
             if 0 < self.hp / self.maxhp <= 0.7 and self.boss_phase == 1:
                 self.boss_phase = 2
-                self.current_damage += self.base_damage * 0.3
+                self.apply_stat_gain(bonus)
                 glitch_text(f"\n[{self.name_display}]: 'Your soul has a peculiar flavor. I shall stop playing with my food.'", speed=0.08)
             elif self.hp <= 0 and self.boss_phase == 2:
+                self.hp = 0
                 self.boss_phase = 3
+                display_health_heal(self.hp, self.maxhp, int(self.maxhp * 0.5))
                 self.hp = int(self.maxhp * 0.5)
                 self.special_attack_counter = 0
                 shake_text(f"{Fore.RED}THE LICH REFUSES TO FALL!{Style.RESET_ALL}")
@@ -127,7 +157,7 @@ class Boss:
             if self.hp / self.maxhp <= 0.5 and self.boss_phase == 1:
                 self.boss_phase = 2
                 self.damage_negation = 0.4
-                self.current_damage += self.base_damage * 0.3
+                self.apply_stat_gain(bonus)
                 self.immunity.append('freeze')
                 self.special_attack_chance += 0.2
                 shake_text(f"The {self.name_display}'s armor shatters, revealing a void of shadow!")

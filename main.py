@@ -10,11 +10,10 @@ init()
 
 p1 = None
 start_floor = 0
-if __name__ == '__main__':
-    p1 = Player('Mage')
-    engage_boss(p1)
+
 if saves:
     if questionary.select("Do you want to load an existing save?", choices=['Yes', "No"]).ask() == 'Yes':
+
         time.sleep(1)
         chosen_save = questionary.select("Which save do you want to load:", choices=saves).ask()
         data = load_save(chosen_save)

@@ -97,17 +97,17 @@ class Player:
             typewriter(f"{Fore.LIGHTGREEN_EX}You are no longer on fire{Style.RESET_ALL}")
 
     def is_debuffed(self):
+        if self.debuff_time <= 0 and self.is_player_debuffed:
+            self.is_player_debuffed = False
+            self.current_physical_multi = self.physical_multi
+            self.current_magic_multi = self.magic_multi
+            typewriter(f"{Fore.LIGHTGREEN_EX}Your debuff has expired{Style.RESET_ALL}")
         if self.is_player_debuffed:
             if self.current_physical_multi == self.physical_multi:
                 self.current_physical_multi -= 0.3
                 self.current_magic_multi -= 0.3
             typewriter(f"{Fore.MAGENTA}You are debuffed!{Style.RESET_ALL}")
             self.debuff_time -= 1
-        if self.debuff_time <= 0 and self.is_player_debuffed:
-            self.is_player_debuffed = False
-            self.current_physical_multi = self.physical_multi
-            self.current_magic_multi = self.magic_multi
-            typewriter(f"{Fore.LIGHTGREEN_EX}Your debuff has expired{Style.RESET_ALL}")
 
     def gain_xp(self, xp):
         self.xp += xp
@@ -128,6 +128,8 @@ class Player:
         self.magic_multi *= 1.1
         self.hp = self.maxhp
         self.mana = self.maxmana
+        self.current_physical_multi = self.physical_multi
+        self.current_magic_multi = self.magic_multi
         if self.level == 3:
             self.spelllevel = 2
             self.spells = [name for name, data in self.SPELL_DATABASE.items() if data['level'] <= self.spelllevel]
