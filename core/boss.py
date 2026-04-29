@@ -175,6 +175,7 @@ class Boss:
                     damage = int(self.current_damage * 1.5)
                     shake_text(f"{Fore.RED}BLOODY DOMAIN: ASCENSION{Style.RESET_ALL}")
                     p1.take_damage(damage)
+                    display_health_heal(self.hp, self.maxhp, damage)
                     self.hp += damage
                     typewriter(f"{Fore.GREEN}Life essence siphoned!{Style.RESET_ALL} The Lich's wounds close.")
                     self.special_attack_counter = 0
