@@ -83,31 +83,6 @@ class Player(Entity):
         print(f"Magic Multiplier: {self.magic_multi:.2f}\n")
         time.sleep(1.5)
 
-    def is_burning(self):
-        if self.is_player_burning:
-            if self.hp > 0:
-                burn_damage = int(self.maxhp * 0.1)
-                self.hp -= burn_damage
-                self.burn_time -= 1
-                typewriter(f"You took {Fore.RED}{burn_damage} fire damage!{Style.RESET_ALL}")
-                time.sleep(0.5)
-        if self.burn_time <= 0 and self.is_player_burning:
-            self.is_player_burning = False
-            typewriter(f"{Fore.LIGHTGREEN_EX}You are no longer on fire{Style.RESET_ALL}")
-
-    def is_debuffed(self):
-        if self.debuff_time <= 0 and self.is_player_debuffed:
-            self.is_player_debuffed = False
-            self.current_physical_multi = self.physical_multi
-            self.current_magic_multi = self.magic_multi
-            typewriter(f"{Fore.LIGHTGREEN_EX}Your debuff has expired{Style.RESET_ALL}")
-        if self.is_player_debuffed:
-            if self.current_physical_multi == self.physical_multi:
-                self.current_physical_multi -= 0.3
-                self.current_magic_multi -= 0.3
-            typewriter(f"{Fore.MAGENTA}You are debuffed!{Style.RESET_ALL}")
-            self.debuff_time -= 1
-
     def gain_xp(self, xp):
         self.xp += xp
         time.sleep(0.5)
