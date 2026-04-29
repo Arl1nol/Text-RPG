@@ -3,11 +3,12 @@ import questionary
 from colorama import init, Fore, Style
 from database import item_database
 from helpers.type_writer import typewriter
+from core.entity import Entity
 
 init()
 
 
-class Player:
+class Player(Entity):
     CLASS_STATS = {
         'Warrior': {'hp_mod': 30, 'mana_mod': -20, 'p_multi': 0.35, 'm_multi': -0.1, 'mana_regen_mod': -1,
                     'items': ['rusty_dagger'],
@@ -65,13 +66,11 @@ class Player:
         self.shield_overshield = 0
         self.shield_durability = 1
         self.spelllevel = 1
-        self.is_player_burning = False
-        self.burn_time = 0
-        self.is_player_debuffed = False
-        self.debuff_time = 0
         self.current_physical_multi = self.physical_multi
         self.current_magic_multi = self.magic_multi
         self.spells = [name for name, data in self.SPELL_DATABASE.items() if data['level'] == self.spelllevel]
+        super().__init__(self.role, self.hp, self.maxhp, 0, None)
+        
 
         print(f"{Fore.YELLOW}--- Character Summary ---{Style.RESET_ALL}")
         print(f"Role: {Fore.CYAN}{self.role}{Style.RESET_ALL}")
@@ -268,9 +267,7 @@ class Player:
 
     def take_damage(self, enemy_attack):
         taken_damage = self.after_shield_damage(enemy_attack) if self.equipped_shield else enemy_attack
-        self.hp -= taken_damage
-        typewriter(f"You took {Fore.RED}{taken_damage} damage{Style.RESET_ALL}!")
-        time.sleep(0.5)
+        super().take_damage(taken_damage)
 
     def cast_spell(self, name, target):
         added_damage = 1

@@ -1,11 +1,11 @@
 import random
 import time
-import sys
 from colorama import Fore, Style
 from database import item_database, boss_database
 from helpers.type_writer import typewriter, shake_text, glitch_text, display_health_damage, display_health_heal
+from core.entity import Entity
 
-class Boss:
+class Boss(Entity):
     def __init__(self, p1):
         all_bosses = list(boss_database.keys())
         boss = random.choice(all_bosses)
@@ -27,21 +27,14 @@ class Boss:
         self.coindrop = random.randint(*boss_stats['coin_drop'])
         self.xpdrop = random.randint(*boss_stats['xp_gain'])
         self.weakness = boss_stats['weakness']
+
+        super().__init__(self.name, self.hp, self.maxhp, self.base_damage, self.weakness, False)
         
         # States & Mechanics
-        self.is_enemy_burning = False
-        self.is_enemy_frozen = False
-        self.is_enemy_debuffed = False
-        self.burn_time = 0
-        self.freeze_time = 0
-        self.debuff_time = 0
-        self.can_i_attack = True
-        self.is_alive = True
         self.turn_count = 0
         self.is_special_attack_active = False
         self.special_attack_counter = 0
-        self.boss_phase = 1
-        self.damage_negation = 0
+        self.boss_phase = 1 
         self.immunity = []
         self.special_attack_chance = 0.2
         self.debuff_applied = False

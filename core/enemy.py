@@ -3,10 +3,11 @@ import random
 from colorama import init, Fore, Style
 import time
 from helpers.type_writer import typewriter
+from core.entity import Entity
 
 init()
 
-class Enemy:
+class Enemy(Entity):
     def __init__(self, p1):
         enemy_keys = list(enemy_database.keys())
         enemy_weights = []
@@ -33,27 +34,7 @@ class Enemy:
         self.coindrop = random.randint(*enemy_stats['coindrop'])
         self.xpdrop = random.randint(*enemy_stats['xp'])
         self.weakness = enemy_stats['weakness']
-        self.is_enemy_burning = False
-        self.is_enemy_frozen = False
-        self.is_enemy_debuffed = False
-        self.burn_time = 0
-        self.freeze_time = 0
-        self.debuff_time = 0
-        self.can_i_attack = True
-        self.is_alive = True
-        self.damage_negation = 0
-        self.debuff_applied = False
-
-    def is_burning(self):
-        if self.is_enemy_burning:
-            if self.hp > 0:
-                burn_damage = int(self.maxhp * 0.1)
-                self.hp -= burn_damage
-                self.burn_time -= 1
-                typewriter(f"The {self.name_display} took {Fore.RED}{burn_damage} fire damage!{Style.RESET_ALL}")
-                time.sleep(0.5)
-        if self.burn_time <= 0:
-            self.is_enemy_burning = False
+        super().__init__(self.name, self.hp, self.maxhp, self.base_damage, self.weakness, False)
 
     def apply_stat_gain(self, amount):
         """Standardizes how damage is added, even for regular enemies."""
@@ -61,34 +42,6 @@ class Enemy:
             self.current_damage += int(amount * 0.8)
         else:
             self.current_damage += int(amount)
-
-    def is_debuffed(self):
-        # 1. Handle Expiration
-        if self.debuff_time <= 0 and self.is_enemy_debuffed:
-            self.is_enemy_debuffed = False
-            if self.debuff_applied:
-                self.current_damage = int(self.current_damage / 0.8)
-                self.debuff_applied = False 
-            typewriter(f"The {self.name_display} regains its strength!")
-
-        # 2. Handle Active Debuff
-        if self.is_enemy_debuffed:
-            if not self.debuff_applied:
-                self.current_damage = int(self.current_damage * 0.8)
-                self.debuff_applied = True          
-            typewriter(f"The {self.name_display} is {Fore.MAGENTA}weakened{Style.RESET_ALL}!")
-            self.debuff_time -= 1
-
-    def is_frozen(self):
-        if self.is_enemy_frozen:
-            self.can_i_attack = False
-            self.freeze_time -= 1
-            typewriter(f"The {self.name_display} can't attack because it's {Fore.CYAN}frozen{Style.RESET_ALL}.")
-            time.sleep(0.5)
-            if self.freeze_time <= 0:
-                self.is_enemy_frozen = False
-            return
-        self.can_i_attack = True
 
     def is_dead(self, player):
         if self.hp < 1:
@@ -106,14 +59,6 @@ class Enemy:
         typewriter(f"\nThe {self.name_display} {Fore.RED}strikes{Style.RESET_ALL}!")
         dealt_damage = int(self.current_damage + self.current_damage * random.uniform(-0.2, 0.2))
         target.take_damage(dealt_damage)
-
-    def take_damage(self, damage):
-        damage_output = damage * (1-self.damage_negation)
-        self.hp -= damage_output
-        self.hp = max(self.hp, 0)
-        if not self.damage_negation == 0:
-            typewriter(f"{Fore.LIGHTRED_EX}{self.damage_negation * 100}% of the damage was negated{Style.RESET_ALL}")
-        typewriter(f"{Fore.YELLOW}You dealt {damage_output} damage to the {self.name}!{Style.RESET_ALL}")
 
     def drop_item(self):
         enemy_rarity = enemy_database[self.name]['rarity']
